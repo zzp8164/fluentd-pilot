@@ -8,6 +8,10 @@ fluentd-pilot
 Try it
 ======
 
+```
+docker pull daocloud.io/baidao/fluentd-pilot:v0.3-ubuntu
+```
+
 Prerequisites:
 
 - docker-compose >= 1.6
