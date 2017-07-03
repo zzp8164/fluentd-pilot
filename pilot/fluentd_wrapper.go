@@ -2,10 +2,11 @@ package pilot
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"os"
 	"os/exec"
 	"syscall"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 var fluentd *exec.Cmd
@@ -15,7 +16,7 @@ func StartFluentd() error {
 		return fmt.Errorf("fluentd already started")
 	}
 	log.Warn("start fluentd")
-	fluentd = exec.Command("/usr/bin/fluentd", "-c", "/etc/fluentd/fluentd.conf", "-p", "/etc/fluentd/plugins")
+	fluentd = exec.Command("/usr/local/bundle/bin/fluentd", "-c", "/etc/fluentd/fluentd.conf", "-p", "/etc/fluentd/plugins")
 	fluentd.Stderr = os.Stderr
 	fluentd.Stdout = os.Stdout
 	return fluentd.Start()

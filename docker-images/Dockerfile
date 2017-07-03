@@ -1,10 +1,9 @@
-FROM alpine:3.5
+FROM ruby:2.3
 
-RUN apk update && apk upgrade && \  
-  apk add ruby-json ruby-irb && \
-  apk add build-base ruby-dev && \
-  apk add ca-certificates wget && \
-  apk add git && \
+RUN apt-get update && \
+  apt-get install git -y &&\
+  apt-get install wget -y &&\
+  apt-get install ruby-dev -y &&\
   gem install fluentd -v "~> 0.12.0" --no-ri --no-rdoc && \
   gem install fluent-plugin-elasticsearch --no-ri --no-rdoc && \
   gem install gelf -v "~> 3.0.0" --no-ri --no-rdoc && \
@@ -13,7 +12,6 @@ RUN apk update && apk upgrade && \
   gem specific_install https://github.com/RussellCloud/fluent-plugin-kafka.git && \
   gem install zookeeper --no-ri --no-rdoc&& \
   gem install ruby-kafka --no-ri --no-rdoc&& \
-  apk del build-base ruby-dev && \
   rm -rf /root/.gem
 
 COPY plugins/ /etc/fluentd/plugins/
