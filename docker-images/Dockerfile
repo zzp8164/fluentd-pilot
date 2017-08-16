@@ -22,5 +22,6 @@ COPY pilot fluentd.tpl entrypoint config.default /pilot/
 VOLUME /pilot/pos
 
 EXPOSE 24224
+WORKDIR /pilot/
 #CMD exec fluentd -c /fluentd/etc/$FLUENTD_CONF -p /fluentd/plugins $FLUENTD_OPT
 CMD /pilot/entrypoint

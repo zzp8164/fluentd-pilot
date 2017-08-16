@@ -112,6 +112,7 @@ type LogConfig struct {
 	File         string
 	Tags         map[string]string
 	Target       string
+	TimeKey      string
 }
 
 func (p *Pilot) cleanConfigs() error {
@@ -158,6 +159,9 @@ func (p *Pilot) processAllContainers() error {
 	}
 
 	for _, c := range containers {
+		if c.State == "removing" {
+			continue
+		}
 		containerJSON, err := p.client().ContainerInspect(context.Background(), c.ID)
 		if err != nil {
 			return err
@@ -276,9 +280,18 @@ func (p *Pilot) processEvent(msg events.Message) error {
 }
 
 func (p *Pilot) hostDirOf(path string, mounts map[string]types.MountPoint) string {
+	confPath := path
 	for {
 		if point, ok := mounts[path]; ok {
-			return point.Source
+			if confPath == path {
+				return point.Source
+			} else {
+				relPath, err := filepath.Rel(path, confPath)
+				if err != nil {
+					panic(err)
+				}
+				return fmt.Sprintf("%s/%s", point.Source, relPath)
+			}
 		}
 		path = filepath.Dir(path)
 		if path == "/" || path == "." {
@@ -325,6 +338,11 @@ func (p *Pilot) parseLogConfig(name string, info *LogInfoNode, jsonLogPath strin
 
 	target := info.get("target")
 
+	timeKey := info.get("time_key")
+	if timeKey == "" {
+		timeKey = "@timestamp"
+	}
+
 	if path == "stdout" {
 		return &LogConfig{
 			Name:         name,
@@ -334,6 +352,7 @@ func (p *Pilot) parseLogConfig(name string, info *LogInfoNode, jsonLogPath strin
 			Tags:         tagMap,
 			FormatConfig: map[string]string{"time_format": "%Y-%m-%dT%H:%M:%S.%NZ"},
 			Target:       target,
+			TimeKey:      timeKey,
 		}, nil
 	}
 
@@ -376,6 +395,7 @@ func (p *Pilot) parseLogConfig(name string, info *LogInfoNode, jsonLogPath strin
 		HostDir:      filepath.Join(p.base, hostDir),
 		FormatConfig: formatConfig,
 		Target:       target,
+		TimeKey:      timeKey,
 	}, nil
 }
 
